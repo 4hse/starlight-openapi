@@ -13,7 +13,7 @@ interface Props extends SectionHeadingProps {
   schema: Schema
 }
 
-const { level = 2, operation, prefix = '', responses, schema } = Astro.props
+const { level = 4, operation, prefix = '', responses, schema } = Astro.props
 
 const id = prefix ? `${prefix}-responses` : 'responses'
 const responseSectionHeadingProps: SectionHeadingProps = {
