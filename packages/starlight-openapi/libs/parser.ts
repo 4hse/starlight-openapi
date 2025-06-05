@@ -10,7 +10,15 @@ export async function parseSchema(
   try {
     logger.info(`Parsing OpenAPI schema at '${config.schema}'.`)
 
-    const document = await OpenAPIParser.bundle(config.schema)
+    const document = await OpenAPIParser.bundle(config.schema, {
+      resolve: {
+        http: {
+          headers: {
+            'User-Agent': 'Starlight OpenAPI Parser',
+          },
+        }
+      }
+    })
 
     return { config, document }
   } catch (error) {
