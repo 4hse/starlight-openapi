@@ -25,7 +25,7 @@ schema.document = await OpenAPIParser.dereference(schema.document)
 const isOverview = type === 'overview'
 const isOperationTag = type === 'operation-tag'
 
-const title = isOverview || isOperationTag ? 'Overview' : Astro.props.operation.title
+const title = isOverview || isOperationTag ? schema.document.info.title : Astro.props.operation.title
 ---
 
 <StarlightPage

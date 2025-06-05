@@ -1,5 +1,6 @@
 ---
 import { getOpenAPIVersion, getSummary } from '../libs/document'
+import { getOperationsByTag, getWebhooksOperations } from '../libs/operation'
 import type { Schema } from '../libs/schema'
 import { getSecurityDefinitions } from '../libs/security'
 import { interspece } from '../libs/utils'
@@ -7,6 +8,7 @@ import { interspece } from '../libs/utils'
 import ExternalDocs from './ExternalDocs.astro'
 import Heading from './Heading.astro'
 import Md from './Md.astro'
+import Operation from './operation/Operation.astro'
 import SecurityDefinitions from './security/SecurityDefinitions.astro'
 import Text from './Text.astro'
 
@@ -15,6 +17,7 @@ interface Props {
 }
 
 const {
+  schema,
   schema: { document },
 } = Astro.props
 
@@ -23,46 +26,107 @@ const securityDefinitions = getSecurityDefinitions(document)
 const contacts = [document.info.contact?.url, document.info.contact?.email].filter(
   (contact): contact is string => !!contact,
 )
+
+// Get all operations
+const operationsByTag = getOperationsByTag(schema)
+const allOperations = [...operationsByTag.values()].flatMap(tag => tag.entries)
+const webhookOperations = getWebhooksOperations(schema)
 ---
 
 <Text>{summary}</Text>
 
-<Heading level={2} id="overview">{document.info.title} ({document.info.version})</Heading>
-
 <Md text={document.info.description} />
 <ExternalDocs docs={document.externalDocs} />
-<ul>
+<dl class="api-info">
   {
     contacts.length > 0 && (
-      <li>
-        {document.info.contact?.name ?? 'Contact'}:{' '}
-        {interspece(
+      
+        <dt>{document.info.contact?.name ?? 'Contact'}:{' '}</dt>
+        <dd>{interspece(
           ' - ',
           contacts.map((contact, index) => <a href={index === 1 ? `mailto:${contact}` : contact}>{contact}</a>),
         )}
-      </li>
+        </dd>
     )
   }
   {
     document.info.license && (
-      <li>
-        License:{' '}
-        {document.info.license.url ? (
+      <dt>License</dt>
+      <dd>{document.info.license.url ? (
           <a href={document.info.license.url}>{document.info.license.name}</a>
         ) : (
           document.info.license.name
         )}
-      </li>
+      </dd>
     )
   }
   {
     document.info.termsOfService && (
-      <li>
-        <a href={document.info.termsOfService}>Terms of Service</a>
-      </li>
+      <dt>Terms of Service</dt>
+      <dd><a href={document.info.termsOfService}>{document.info.termsOfService}</a></dd>
     )
   }
-  <li>OpenAPI version: {getOpenAPIVersion(document)}</li>
-</ul>
+
+  
+  <dt>Version</dt>
+  <dd>{document.info.version}</dd>
+  
+  <dt>OpenAPI version</dt>
+  <dd>{getOpenAPIVersion(document)}</dd>
+</dl>
 
 <SecurityDefinitions definitions={securityDefinitions} />
+
+<style>
+  .operation-container {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--sl-color-gray-5);
+  }
+
+  dl.api-info {
+    display: grid;
+    grid-template-columns: max-content auto;
+  }
+
+  .api-info > dt {
+    grid-column-start: 1;
+    margin-top: 0;
+  }
+
+  .api-info dd {
+    grid-column-start: 2;
+    margin-top: 0;
+  }
+</style>
+
+{allOperations.length > 0 && (
+  <>
+    <Heading level={2} id="operations">Operations</Heading>
+    {[...operationsByTag.entries()].map(([tagName, tagOperations]) => (
+      <>
+        {tagOperations.entries.map((operation) => (
+          <div class="operation-container">
+            <Heading level={3} id={`operation-${operation.operation.operationId}-${operation.method}`}>
+              {operation.operation.summary}
+            </Heading>
+            <Operation schema={schema} operation={operation} />
+          </div>
+        ))}
+      </>
+    ))}
+  </>
+)}
+
+{webhookOperations.length > 0 && (
+  <>
+    <Heading level={2} id="webhooks">Webhooks</Heading>
+    {webhookOperations.map((operation) => (
+      <div class="operation-container">
+        <Heading level={4} id={`webhook-${operation.operation.operationId}`}>
+          {operation.method.toUpperCase()} {operation.path}
+        </Heading>
+        <Operation schema={schema} operation={operation} />
+      </div>
+    ))}
+  </>
+)}

@@ -4,11 +4,12 @@ import type { MarkdownHeading } from 'astro'
 
 import { getCallbacks } from './callback'
 import type { OperationHttpMethod, OperationTag, PathItemOperation } from './operation'
+import { getOperationsByTag, getWebhooksOperations } from './operation'
 import { getParametersByLocation } from './parameter'
-import { slug, stripLeadingAndTrailingSlashes } from './path'
+import { getBaseLink, slug, stripLeadingAndTrailingSlashes } from './path'
 import { hasRequestBody } from './requestBody'
 import { includesDefaultResponse } from './response'
-import { getSchemaSidebarGroups, type Schema } from './schema'
+import type { Schema } from './schema'
 import { getSecurityDefinitions, getSecurityRequirements } from './security'
 import { capitalize } from './utils'
 
@@ -54,11 +55,15 @@ export function getSidebarFromSchemas(
     return sidebar
   }
 
-  const sidebarGroups = schemas.map((schema) => getSchemaSidebarGroups(pathname, schema))
+  // Create direct links for each schema instead of groups
+  const sidebarLinks = schemas.map((schema) => {
+    const { config, document } = schema
+    return makeSidebarLink(pathname, config.sidebar.label ?? document.info.title, getBaseLink(config))
+  })
 
-  function replaceSidebarGroupsPlaceholder(group: SidebarGroup): SidebarGroup | SidebarGroup[] {
+  function replaceSidebarGroupsPlaceholder(group: SidebarGroup): SidebarGroup | SidebarItem[] {
     if (group.label === starlightOpenAPISidebarGroupsLabel.toString()) {
-      return sidebarGroups
+      return sidebarLinks
     }
 
     if (isSidebarGroup(group)) {
@@ -94,8 +99,9 @@ function isSidebarGroup(item: SidebarItem): item is SidebarGroup {
   return item.type === 'group'
 }
 
-function getOverviewHeadings({ document }: Schema): MarkdownHeading[] {
-  const items: MarkdownHeading[] = [makeHeading(2, `${document.info.title} (${document.info.version})`, 'overview')]
+function getOverviewHeadings(schema: Schema): MarkdownHeading[] {
+  const { document } = schema
+  const items: MarkdownHeading[] = [];
 
   const securityDefinitions = getSecurityDefinitions(document)
 
@@ -104,6 +110,34 @@ function getOverviewHeadings({ document }: Schema): MarkdownHeading[] {
       makeHeading(2, 'Authentication'),
       ...Object.keys(securityDefinitions).map((name) => makeHeading(3, name)),
     )
+  }
+
+  // Add Operations heading if there are operations to display
+  const operationsByTag = getOperationsByTag(schema)
+  const allOperations = [...operationsByTag.values()].flatMap(tag => tag.entries)
+  if (allOperations.length > 0) {
+    items.push(makeHeading(2, 'Operations', 'operations'))
+
+    // Add tag headings and operation headings
+    for (const [tagName, tagOperations] of operationsByTag.entries()) {
+      // Add operation headings under each tag
+      for (const operation of tagOperations.entries) {
+        const operationId = `operation-${operation.operation.operationId}-${operation.method}`
+        items.push(makeHeading(3, `${operation.operation.summary} ${operation.method.toUpperCase()}`, operationId))
+      }
+    }
+  }
+
+  // Add Webhooks heading if there are webhooks to display
+  const webhookOperations = getWebhooksOperations(schema)
+  if (webhookOperations.length > 0) {
+    items.push(makeHeading(2, 'Webhooks', 'webhooks'))
+
+    // Add webhook operation headings
+    for (const operation of webhookOperations) {
+      const webhookId = `webhook-${operation.operation.operationId}`
+      items.push(makeHeading(4, `${operation.method.toUpperCase()} ${operation.path}`, webhookId))
+    }
   }
 
   return makeHeadings(items)
