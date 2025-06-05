@@ -18,7 +18,7 @@ interface Props extends SectionHeadingProps {
   schema: Schema
 }
 
-const { level = 2, operation, prefix, schema } = Astro.props
+const { level = 4, operation, prefix, schema } = Astro.props
 
 const openAPIV2RequestBodyParameter = getOpenAPIV2RequestBodyParameter(operation)
 const openAPIV3RequestBody = getOpenAPIV3RequestBody(operation)
