@@ -26,11 +26,11 @@ export default function starlightOpenAPIPlugin(userConfig: StarlightOpenAPIUserC
         const config = validateConfig(logger, userConfig)
         const schemas = await Promise.all(config.map((schemaConfig) => parseSchema(logger, schemaConfig)))
 
-        addRouteMiddleware({ entrypoint: 'starlight-openapi/middleware', order: 'post' })
+        addRouteMiddleware({ entrypoint: '@4hse/starlight-openapi/middleware', order: 'post' })
         addIntegration(starlightOpenAPIIntegration(schemas))
 
         const updatedConfig: Parameters<typeof updateConfig>[0] = {
-          customCss: [...(starlightConfig.customCss ?? []), 'starlight-openapi/styles'],
+          customCss: [...(starlightConfig.customCss ?? []), '@4hse/starlight-openapi/styles'],
         }
 
         if (updatedConfig.expressiveCode !== false) {
