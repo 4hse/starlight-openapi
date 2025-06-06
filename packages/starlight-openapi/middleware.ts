@@ -16,8 +16,14 @@ export const onRequest = defineRouteMiddleware((context) => {
     allSchemas,
   )
 
-  if (context.currentLocale !== config.defaultLocale.locale) {
+  const isApiPath = allSchemas.filter(schema => stripLocale(schema.config.base) === stripLocale(context.url.pathname)).length > 0;
+
+  if (context.currentLocale !== config.defaultLocale.locale && isApiPath) {
       starlightRoute.isFallback = true;
   }
 
 })
+
+function stripLocale(path: string): string {
+  return stripLeadingAndTrailingSlashes(path).replace(/^[a-z]{2}\//, '');
+}
