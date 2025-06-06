@@ -1,9 +1,7 @@
 import { z } from 'astro/zod'
 import type { OpenAPI } from 'openapi-types'
 
-import { getBaseLink, stripLeadingAndTrailingSlashes } from './path'
-import { getPathItemSidebarGroups, getWebhooksSidebarGroups } from './pathItem'
-import { makeSidebarGroup, makeSidebarLink, type SidebarGroup } from './starlight'
+import { stripLeadingAndTrailingSlashes } from './path'
 
 export const SchemaConfigSchema = z
   .object({
@@ -106,20 +104,6 @@ export const SchemaConfigSchema = z
 
     return rest
   })
-
-export function getSchemaSidebarGroups(pathname: string, schema: Schema): SidebarGroup {
-  const { config, document } = schema
-
-  return makeSidebarGroup(
-    config.sidebar.label ?? document.info.title,
-    [
-      makeSidebarLink(pathname, 'Overview', getBaseLink(config)),
-      ...getPathItemSidebarGroups(pathname, schema),
-      ...getWebhooksSidebarGroups(pathname, schema),
-    ],
-    config.sidebar.collapsed,
-  )
-}
 
 export type StarlightOpenAPISchemaConfig = z.infer<typeof SchemaConfigSchema>
 
