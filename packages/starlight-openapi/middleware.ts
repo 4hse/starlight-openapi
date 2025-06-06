@@ -1,6 +1,6 @@
 import { defineRouteMiddleware } from '@astrojs/starlight/route-data'
 import schemas from 'virtual:starlight-openapi-schemas'
-
+import config from 'virtual:starlight/user-config';
 import { stripLeadingAndTrailingSlashes } from './libs/path'
 import { getSidebarFromSchemas } from './libs/starlight'
 
@@ -15,4 +15,9 @@ export const onRequest = defineRouteMiddleware((context) => {
     sidebar,
     allSchemas,
   )
+
+  if (context.currentLocale !== config.defaultLocale.locale) {
+      starlightRoute.isFallback = true;
+  }
+
 })
