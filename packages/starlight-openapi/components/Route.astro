@@ -9,11 +9,27 @@ import { getPageProps } from '../libs/starlight'
 import Operation from './operation/Operation.astro'
 import OperationTag from './OperationTag.astro'
 import Overview from './Overview.astro'
+import { getRelativeLocaleUrlList } from 'astro:i18n'
 
 export const prerender = true
 
 export function getStaticPaths() {
-  return getSchemaStaticPaths()
+  const staticPath = getSchemaStaticPaths();
+  const langStaticsPaths = [];
+  for (const path of staticPath) {
+    const unPrefixLang = path.params.openAPISlug.replace(/^[a-z]{2}\//, '');
+    const pathList = getRelativeLocaleUrlList(unPrefixLang);
+    langStaticsPaths.push(
+      ...pathList.map((langPath) => ({
+        props: path.props,
+        params: {
+          openAPISlug: langPath
+        }
+      }))
+    )
+  }
+  return langStaticsPaths;
+
 }
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>
