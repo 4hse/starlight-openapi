@@ -88,7 +88,12 @@ export function makeSidebarGroup(label: string, entries: SidebarItem[], collapse
 }
 
 export function makeSidebarLink(pathname: string, label: string, href: string, badge?: SidebarBadge): SidebarLink {
-  return { type: 'link', isCurrent: pathname === stripLeadingAndTrailingSlashes(href), label, href, badge, attrs: {} }
+  const currentLocale = pathname.split('/')[0];
+  const localizedHrefArray = href.split('/');
+  localizedHrefArray[1] = currentLocale;
+  const localizedHref = localizedHrefArray.join('/');
+
+  return { type: 'link', isCurrent: pathname === stripLeadingAndTrailingSlashes(localizedHref), label, href: localizedHref, badge, attrs: {} }
 }
 
 export function getMethodSidebarBadge(method: OperationHttpMethod): SidebarBadge {
