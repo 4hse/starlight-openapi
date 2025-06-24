@@ -1,13 +1,10 @@
 import schemas from 'virtual:starlight-openapi-schemas'
 
 import {
-  getOperationsByTag,
-  getWebhooksOperations,
-  isMinimalOperationTag,
   type OperationTag,
   type PathItemOperation,
 } from './operation'
-import { getBasePath, slug, stripLeadingAndTrailingSlashes } from './path'
+import { getBasePath, stripLeadingAndTrailingSlashes } from './path'
 import type { Schema } from './schema'
 
 export function getSchemaStaticPaths(): StarlighOpenAPIRoute[] {
@@ -20,61 +17,8 @@ export function getSchemaStaticPaths(): StarlighOpenAPIRoute[] {
         schema,
         type: 'overview',
       },
-    },
-    ...getPathItemStaticPaths(schema),
-    ...getWebhooksStaticPaths(schema),
-  ])
-}
-
-function getPathItemStaticPaths(schema: Schema): StarlighOpenAPIRoute[] {
-  const baseLink = getBasePath(schema.config)
-  const operations = getOperationsByTag(schema)
-
-  return [...operations.entries()].flatMap(([, operations]) => {
-    const paths: StarlighOpenAPIRoute[] = operations.entries.map((operation) => {
-      return {
-        params: {
-          openAPISlug: stripLeadingAndTrailingSlashes(baseLink + operation.slug),
-        },
-        props: {
-          operation,
-          schema,
-          type: 'operation',
-        },
-      }
-    })
-
-    if (!isMinimalOperationTag(operations.tag)) {
-      paths.unshift({
-        params: {
-          openAPISlug: stripLeadingAndTrailingSlashes(`${baseLink}operations/tags/${slug(operations.tag.name)}`),
-        },
-        props: {
-          schema,
-          tag: operations.tag,
-          type: 'operation-tag',
-        },
-      })
     }
-
-    return paths
-  })
-}
-
-function getWebhooksStaticPaths(schema: Schema): StarlighOpenAPIRoute[] {
-  const baseLink = getBasePath(schema.config)
-  const operations = getWebhooksOperations(schema)
-
-  return operations.map((operation) => ({
-    params: {
-      openAPISlug: stripLeadingAndTrailingSlashes(baseLink + operation.slug),
-    },
-    props: {
-      operation,
-      schema,
-      type: 'operation',
-    },
-  }))
+  ])
 }
 
 interface StarlighOpenAPIRoute {
