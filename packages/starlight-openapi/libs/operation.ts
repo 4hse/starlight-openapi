@@ -94,7 +94,8 @@ export function getWebhooksOperations({ config, document }: Schema): PathItemOpe
       }
 
       const operation = pathItem[method]
-      const operationId = operation.operationId ?? webhookKey
+      operation.operationId = operation.operationId ?? webhookKey
+      const operationId = operation.operationId
 
       const title = operation.summary ?? operationId
 
