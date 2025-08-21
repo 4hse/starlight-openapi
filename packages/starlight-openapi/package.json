@@ -1,6 +1,6 @@
 {
   "name": "@4hse/starlight-openapi",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "license": "MIT",
   "description": "Starlight plugin to generate documentation from OpenAPI/Swagger specifications.",
   "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",

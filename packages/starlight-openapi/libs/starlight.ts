@@ -128,7 +128,7 @@ function getOverviewHeadings(schema: Schema): MarkdownHeading[] {
       // Add operation headings under each tag
       for (const operation of tagOperations.entries) {
         const operationId = `operation-${operation.operation.operationId}-${operation.method}`
-        items.push(makeHeading(3, `${operation.operation.summary} ${operation.method.toUpperCase()}`, operationId))
+        items.push(makeHeading(3, operation.operation.summary ?? 'unknown', operationId))
       }
     }
   }
@@ -141,7 +141,7 @@ function getOverviewHeadings(schema: Schema): MarkdownHeading[] {
     // Add webhook operation headings
     for (const operation of webhookOperations) {
       const webhookId = `webhook-${operation.operation.operationId}`
-      items.push(makeHeading(4, `${operation.method.toUpperCase()} ${operation.path}`, webhookId))
+      items.push(makeHeading(4, operation.operation.operationId ?? 'unknown', webhookId))
     }
   }
 
