@@ -1,6 +1,6 @@
 {
   "name": "@4hse/starlight-openapi",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "license": "MIT",
   "description": "Starlight plugin to generate documentation from OpenAPI/Swagger specifications.",
   "author": "HiDeoo <github@hideoo.dev> (https://hideoo.dev)",
@@ -17,7 +17,7 @@
     "lint": "eslint . --cache --max-warnings=0"
   },
   "dependencies": {
-    "@readme/openapi-parser": "^2.7.0",
+    "@readme/openapi-parser": "^6.0.0",
     "github-slugger": "^2.0.0",
     "url-template": "^3.1.1"
   },

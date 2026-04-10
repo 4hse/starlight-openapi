@@ -88,10 +88,19 @@ export function makeSidebarGroup(label: string, entries: SidebarItem[], collapse
 }
 
 export function makeSidebarLink(pathname: string, label: string, href: string, badge?: SidebarBadge): SidebarLink {
-  const currentLocale = pathname.split('/')[0];
-  const localizedHrefArray = href.split('/');
-  localizedHrefArray[1] = currentLocale;
-  const localizedHref = localizedHrefArray.join('/');
+  const pathSegments = pathname.split('/');
+  const hrefSegments = href.split('/');
+
+  // Only localize href if the first segment of the pathname looks like a locale code (2 lowercase letters)
+  // and differs from the href's locale segment
+  const firstSegment = pathSegments[0];
+  const hasLocale = firstSegment !== undefined && /^[a-z]{2}$/.test(firstSegment);
+
+  let localizedHref = href;
+  if (hasLocale) {
+    hrefSegments[1] = firstSegment;
+    localizedHref = hrefSegments.join('/');
+  }
 
   return { type: 'link', isCurrent: pathname === stripLeadingAndTrailingSlashes(localizedHref), label, href: localizedHref, badge, attrs: {} }
 }

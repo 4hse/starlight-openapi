@@ -1,4 +1,4 @@
-import OpenAPIParser from '@readme/openapi-parser'
+import { $RefParser } from '@apidevtools/json-schema-ref-parser'
 import type { AstroIntegrationLogger } from 'astro'
 
 import type { Schema, StarlightOpenAPISchemaConfig } from './schema'
@@ -10,12 +10,14 @@ export async function parseSchema(
   try {
     logger.info(`Parsing OpenAPI schema at '${config.schema}'.`)
 
-    const document = await OpenAPIParser.bundle(config.schema, {
+    const parser = new $RefParser()
+    const document = await parser.bundle(config.schema, {
       resolve: {
         http: {
           headers: {
             'User-Agent': 'Starlight OpenAPI Parser',
           },
+          safeUrlResolver: false,
         }
       }
     })

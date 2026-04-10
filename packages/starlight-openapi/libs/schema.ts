@@ -90,6 +90,16 @@ export const SchemaConfigSchema = z
     // eslint-disable-next-line @typescript-eslint/no-deprecated
     const { collapsed, label, sidebarMethodBadges, ...rest } = value
 
+    // Ensure nested defaults are applied (Zod v4 does not auto-apply nested object defaults)
+    rest.sidebar = rest.sidebar ?? {}
+    rest.sidebar.collapsed = rest.sidebar.collapsed ?? true
+    rest.sidebar.operations = rest.sidebar.operations ?? {}
+    rest.sidebar.operations.badges = rest.sidebar.operations.badges ?? false
+    rest.sidebar.operations.labels = rest.sidebar.operations.labels ?? 'summary'
+    rest.sidebar.operations.sort = rest.sidebar.operations.sort ?? 'document'
+    rest.sidebar.tags = rest.sidebar.tags ?? {}
+    rest.sidebar.tags.sort = rest.sidebar.tags.sort ?? 'document'
+
     if (!collapsed) {
       rest.sidebar.collapsed = collapsed
     }
